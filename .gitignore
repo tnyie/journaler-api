@@ -1,0 +1,9 @@
+*.exe
+journaler
+
+docker-compose.yml
+firebase.json
+
+.vscode
+.idea
+
