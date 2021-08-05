@@ -2,14 +2,14 @@ package views
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 
-	"firebase.google.com/go/auth"
 	"github.com/go-chi/chi"
-	"github.com/tnyie/journaler-api/middleware"
 	"github.com/tnyie/journaler-api/models"
+	"github.com/tnyie/journaler-api/util"
 )
 
 func GetEntry(w http.ResponseWriter, r *http.Request) {
@@ -20,6 +20,12 @@ func GetEntry(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println("Error getting entry\n", err)
 		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	if entry.OwnerID != util.GetUserID(r) {
+		w.WriteHeader(http.StatusNotFound)
+		log.Println(fmt.Errorf("user not authorized to access entry"))
 		return
 	}
 
@@ -49,7 +55,7 @@ func PostEntry(w http.ResponseWriter, r *http.Request) {
 	}
 
 	entry.ID = ""
-	entry.OwnerID = r.Context().Value(middleware.AuthCtx{}).(*auth.Token).UID
+	entry.OwnerID = util.GetUserID(r)
 
 	err = entry.Create()
 	if err != nil {

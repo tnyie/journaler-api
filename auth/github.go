@@ -154,6 +154,8 @@ func completeGithubAuth(w http.ResponseWriter, r *http.Request) {
 
 		cookie := CreateSession(user.ID)
 
+		log.Println(cookie)
+
 		http.SetCookie(w, cookie)
 		url, err := redirect_url.Result()
 		if err != nil {

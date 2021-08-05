@@ -10,6 +10,7 @@ import (
 )
 
 func Route(r *chi.Mux) {
+	r.Use(middleware.AuthMiddleware)
 
 	r.Mount("/auth", authHandler())
 
@@ -31,8 +32,6 @@ func authHandler() http.Handler {
 func userHandler() http.Handler {
 	r := chi.NewRouter()
 
-	r.Use(middleware.AuthMiddleware)
-
 	r.Get("/", views.GetCurrentUser)
 	r.Post("/", views.CreateUser)
 	r.Patch("/{id}", views.UpdateUser)
@@ -44,8 +43,6 @@ func userHandler() http.Handler {
 func journalHandler() http.Handler {
 	r := chi.NewRouter()
 
-	r.Use(middleware.AuthMiddleware)
-
 	r.Get("/", views.GetOwnJournals)
 	r.Get("/{id}", views.GetJournalInfo)
 	r.Post("/", views.CreateJournal)
@@ -55,8 +52,6 @@ func journalHandler() http.Handler {
 
 func entryHandler() http.Handler {
 	r := chi.NewRouter()
-
-	r.Use(middleware.AuthMiddleware)
 
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("hello"))

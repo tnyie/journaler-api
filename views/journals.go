@@ -2,18 +2,24 @@ package views
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 
 	"github.com/go-chi/chi"
 
-	"github.com/tnyie/journaler-api/middleware"
 	"github.com/tnyie/journaler-api/models"
+	"github.com/tnyie/journaler-api/util"
 )
 
 func GetOwnJournals(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value(middleware.AuthCtx{}).(string)
+	userID := util.GetUserID(r)
+	if len(userID) < 1 {
+		w.WriteHeader(http.StatusUnauthorized)
+		log.Println(fmt.Errorf("user id nil"))
+		return
+	}
 
 	journals, err := models.GetOwnJournals(userID)
 	if err != nil {
@@ -34,6 +40,12 @@ func GetOwnJournals(w http.ResponseWriter, r *http.Request) {
 
 func GetJournalInfo(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
+
+	if id != util.GetUserID(r) {
+		w.WriteHeader(http.StatusUnauthorized)
+		log.Println(fmt.Errorf("user not authorized to get journals"))
+		return
+	}
 
 	journal := &models.Journal{
 		ID: id,
@@ -95,7 +107,7 @@ func CreateJournal(w http.ResponseWriter, r *http.Request) {
 	}
 
 	journal.ID = ""
-	journal.OwnerID = r.Context().Value(middleware.AuthCtx{}).(string)
+	journal.OwnerID = util.GetUserID(r)
 
 	journal.Create()
 

@@ -3,6 +3,8 @@ package auth
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"log"
 	"net/http"
 	"time"
 
@@ -45,11 +47,19 @@ func CheckSession(sessonID string) (*models.UserSession, error) {
 
 	thing, err := rds.Get(ctx, sessonID).Result()
 	if err != nil {
+		log.Println(fmt.Errorf("failed to get session from store %s", err))
 		return nil, err
 	}
 
 	var session *models.UserSession
 	err = json.Unmarshal([]byte(thing), &session)
 
+	log.Println(session)
+
 	return session, err
+}
+
+func DeleteSession(sessionID string) error {
+	_, err := rds.Del(ctx, sessionID).Result()
+	return err
 }

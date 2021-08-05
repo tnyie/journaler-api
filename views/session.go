@@ -9,9 +9,10 @@ import (
 
 	"github.com/tnyie/journaler-api/auth"
 	"github.com/tnyie/journaler-api/models"
+	"github.com/tnyie/journaler-api/util"
 )
 
-// CreateUser creates a new internal user
+// Login for internal users
 func Login(w http.ResponseWriter, r *http.Request) {
 	bd, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -50,4 +51,16 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		log.Println(fmt.Errorf("password did not match stored hash"))
 		return
 	}
+}
+
+// LogOut ...
+func LogOut(w http.ResponseWriter, r *http.Request) {
+	err := auth.DeleteSession(util.GetUserID(r))
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Println(fmt.Errorf("failed to delete session %s", err))
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 }

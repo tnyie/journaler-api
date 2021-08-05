@@ -12,12 +12,18 @@ import (
 	"github.com/tnyie/journaler-api/auth"
 	"github.com/tnyie/journaler-api/middleware"
 	"github.com/tnyie/journaler-api/models"
+	"github.com/tnyie/journaler-api/util"
 )
 
 // GetCurrentUser
 func GetCurrentUser(w http.ResponseWriter, r *http.Request) {
 	user := &models.User{
-		ID: r.Context().Value(middleware.AuthCtx{}).(string),
+		ID: util.GetUserID(r),
+	}
+	if user.ID == "" {
+		w.WriteHeader(http.StatusUnauthorized)
+		log.Println(fmt.Errorf("user id nil"))
+		return
 	}
 
 	err := user.Get()
@@ -95,7 +101,7 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 // UpdateUser ...
 func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
-	if id != r.Context().Value(middleware.AuthCtx{}).(string) {
+	if id != util.GetUserID(r) {
 		w.WriteHeader(http.StatusUnauthorized)
 		log.Println(fmt.Errorf("user not authorized"))
 		return
