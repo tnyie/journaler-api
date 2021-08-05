@@ -29,7 +29,16 @@ func (user *User) Get() error {
 }
 
 func (user *User) Create() error {
-	return db.Create(&user).Error
+	err := db.Create(&user).Error
+
+	defaultJournal := &Journal{
+		OwnerID:  user.ID,
+		ParentID: "",
+		Name:     "_default",
+	}
+
+	defaultJournal.Create()
+	return err
 }
 
 func (user *User) Patch() error {
