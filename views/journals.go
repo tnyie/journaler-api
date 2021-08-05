@@ -6,16 +6,16 @@ import (
 	"log"
 	"net/http"
 
-	"firebase.google.com/go/auth"
 	"github.com/go-chi/chi"
+
 	"github.com/tnyie/journaler-api/middleware"
 	"github.com/tnyie/journaler-api/models"
 )
 
 func GetOwnJournals(w http.ResponseWriter, r *http.Request) {
-	user := r.Context().Value(middleware.AuthCtx{}).(*auth.Token)
+	userID := r.Context().Value(middleware.AuthCtx{}).(string)
 
-	journals, err := models.GetOwnJournals(user.UID)
+	journals, err := models.GetOwnJournals(userID)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		log.Println("Couldn't get user journals\n", err)
@@ -95,7 +95,7 @@ func CreateJournal(w http.ResponseWriter, r *http.Request) {
 	}
 
 	journal.ID = ""
-	journal.OwnerID = r.Context().Value(middleware.AuthCtx{}).(*auth.Token).UID
+	journal.OwnerID = r.Context().Value(middleware.AuthCtx{}).(string)
 
 	journal.Create()
 

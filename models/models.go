@@ -1,6 +1,8 @@
 package models
 
 import (
+	"time"
+
 	"gorm.io/gorm"
 
 	pq "github.com/lib/pq"
@@ -10,9 +12,26 @@ import (
 
 var db *gorm.DB
 
+// TODO Ensure username has no '@' symbol
 type User struct {
-	ID      string `json:"id,omitempty"`
-	Enabled bool   `json:"enabled,omitempty"`
+	ID       string `gorm:"primaryKey;type:string;default:uuid_generate_v4()" json:"id,omitempty"`
+	Username string `gorm:"unique" json:"username,omitempty"`
+	Email    string `gorm:"unique" json:"email,omitempty"`
+	Name     string `json:"name,omitempty"`
+	External bool   `json:"external,omitempty"`
+}
+
+type UserAuth struct {
+	ID       string `gorm:"primaryKey;type:string;default:uuid_generate_v4()" json:"id,omitempty"`
+	Email    string `gorm:"unique" json:"email,omitempty"`
+	Username string `gorm:"unique" json:"username,omitempty"`
+	Verified bool   `json:"verified,omitempty"`
+	Hash     []byte `json:"hash,omitempty"`
+}
+
+type Login struct {
+	UserAuth
+	Password string `json:"password"`
 }
 
 // Journal structure to hold child journals and entries
@@ -32,6 +51,11 @@ type Entry struct {
 	OwnerID   string `json:"owner_id,omitempty"`
 	Name      string `json:"name,omitempty"`
 	Content   string `json:"content,omitempty"`
+}
+
+type UserSession struct {
+	ID      string
+	Expires time.Time
 }
 
 // InitModels migrates modesls and initiates database connection

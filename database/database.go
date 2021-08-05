@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/go-redis/redis/v8"
 	"github.com/spf13/viper"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -22,4 +23,12 @@ func InitDB() *gorm.DB {
 		log.Fatal("couldn't connect to database", err)
 	}
 	return db
+}
+
+func InitRedis() *redis.Client {
+	return redis.NewClient(&redis.Options{
+		Addr:     viper.GetString("redis.addr"),
+		Password: viper.GetString("redis.password"),
+		DB:       0,
+	})
 }
