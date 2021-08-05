@@ -18,25 +18,29 @@ func AuthMiddleware(next http.Handler) http.Handler {
 		if err != nil {
 			w.WriteHeader(http.StatusUnauthorized)
 			log.Println(fmt.Errorf("cookie not loaded %s", err))
-			// login page redirect
-			return
+			setContext(r, "")
+			next.ServeHTTP(w, r)
 		}
 
 		session, err := auth.CheckSession(cookie.Value)
 		if err != nil {
 			w.WriteHeader(http.StatusUnauthorized)
 			log.Println(fmt.Errorf("cookie not loaded %s", err))
-			// login page redirect
-			return
+			setContext(r, "")
+			next.ServeHTTP(w, r)
 		}
 
 		if session.Expires.Before(time.Now()) {
 			w.WriteHeader(http.StatusUnauthorized)
 			log.Println(fmt.Errorf("session expired"))
-			// login page redirect
-			return
+			setContext(r, "")
+			next.ServeHTTP(w, r)
 		}
-
-		next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), AuthCtx{}, session.ID)))
+		setContext(r, session.ID)
+		next.ServeHTTP(w, r)
 	})
+}
+
+func setContext(r *http.Request, value string) *http.Request {
+	return r.WithContext(context.WithValue(r.Context(), AuthCtx{}, value))
 }
