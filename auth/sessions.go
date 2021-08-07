@@ -10,6 +10,7 @@ import (
 
 	"github.com/go-redis/redis/v8"
 	"github.com/google/uuid"
+	"github.com/spf13/viper"
 	"github.com/tnyie/journaler-api/models"
 )
 
@@ -39,7 +40,7 @@ func CreateSession(userID string) *http.Cookie {
 		Path:     "/",
 		HttpOnly: true,
 		Expires:  expires,
-		// Secure:   true,
+		Secure:   viper.GetBool("production"),
 	}
 }
 
